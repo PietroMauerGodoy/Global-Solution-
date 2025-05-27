@@ -213,7 +213,7 @@ if __name__ == "__main__":
 | `README.md`            | Documentação do projeto                          |
 | `geo_relato.py`        | Código-fonte principal do sistema CLI            |
 | `integrantes.txt`      | Lista com nome e RM dos integrantes              |
-
+| `link_repositorio.txt`      | Link do repositório           |
 ---
 
 **Desenvolvido para a disciplina de Data Structures and Algorithms - Global Solution 2025.1 - FIAP**

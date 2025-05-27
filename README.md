@@ -56,7 +56,7 @@ Este projeto tem como objetivo criar uma **interface de linha de comando (CLI)**
 
 ```bash
 # Clonar o repositório (se aplicável)
-git clone https://github.com/SEU_USUARIO/seu-repo.git
+git clone https://github.com/SEU_USUARIO/seu-repo.git](https://github.com/PietroMauerGodoy/Global-Solution-
 
 # Entrar no diretório do projeto
 cd geo-relato-cli

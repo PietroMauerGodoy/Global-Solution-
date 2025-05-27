@@ -202,7 +202,9 @@ if __name__ == "__main__":
     menu()
 
 
----
+```
+
+
 
 ### 📁 Arquivos
 
@@ -211,16 +213,6 @@ if __name__ == "__main__":
 | `geo_relato.py`        | Código-fonte principal do sistema CLI            |
 | `README.md`            | Documentação do projeto                          |
 | `integrantes.txt`      | Lista com nome e RM dos integrantes              |
-
----
-
-### 💡 Possíveis melhorias futuras
-
-- Exportação dos dados para `.csv` ou `.json`
-- Interface web com Flask
-- Filtros por período e localização
-- Armazenamento em banco de dados
-- Autenticação de usuários
 
 ---
 

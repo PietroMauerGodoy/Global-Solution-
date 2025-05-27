@@ -210,8 +210,8 @@ if __name__ == "__main__":
 
 | Nome do Arquivo       | Descrição                                         |
 |------------------------|--------------------------------------------------|
-| `geo_relato.py`        | Código-fonte principal do sistema CLI            |
 | `README.md`            | Documentação do projeto                          |
+| `geo_relato.py`        | Código-fonte principal do sistema CLI            |
 | `integrantes.txt`      | Lista com nome e RM dos integrantes              |
 
 ---

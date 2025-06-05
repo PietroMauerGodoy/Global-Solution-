@@ -51,155 +51,181 @@ Este projeto tem como objetivo criar uma **interface de linha de comando (CLI)**
 - Dados pessoais devem estar completos.
 
 ---
-
-### ⚙️ Como executar
-
-```bash
-# Clonar o repositório (se aplicável)
-git clone https://github.com/PietroMauerGodoy/Global-Solution-
-
-# Entrar no diretório do projeto
-cd geo-relato-cli
-
-# Executar o script
-python geo_relato.py
-```
-
----
-
 ### 🧠 Explicação do Código com Código-Fonte
 
-```python
-import math
-from datetime import datetime
+```c
+#include <stdio.h>   // Biblioteca para entrada e saída padrão (printf, scanf)
+#include <stdlib.h>  // Biblioteca geral, aqui não é usada diretamente, mas pode ser útil
+#include <string.h>  // Biblioteca para manipulação de strings (strcmp, strcasecmp)
+#include <math.h>    // Biblioteca matemática para funções trigonométricas e constantes
 
-# -----------------------------
-# Função para calcular distância entre dois pontos usando a fórmula de Haversine
-# -----------------------------
-def calcular_distancia_km(lat1, lon1, lat2, lon2):
-    R = 6371  # Raio médio da Terra em quilômetros
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    delta_phi = math.radians(lat2 - lat1)
-    delta_lambda = math.radians(lon2 - lon1)
+#define MAX_RELATOS 100        // Define o número máximo de relatos que o programa pode armazenar
+#define RAIO_TERRA_KM 6371.0   // Raio da Terra em quilômetros para cálculo de distância
 
-    # Fórmula de Haversine para calcular a distância geográfica
-    a = math.sin(delta_phi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+// Estrutura que representa uma pessoa que faz o relato
+typedef struct {
+    char nome[100];       // Nome completo do relator
+    char documento[50];   // Documento de identificação
+    char email[100];      // Email do relator
+    char telefone[20];    // Telefone do relator
+    float lat;            // Latitude da localização do relator
+    float lon;            // Longitude da localização do relator
+} Relator;
 
-    return R * c  # Retorna a distância em km
+// Estrutura que representa um relato de catástrofe
+typedef struct {
+    Relator relator;      // Informações do relator
+    char tipo[50];        // Tipo de catástrofe (ex: enchente, terremoto)
+    char descricao[200];  // Descrição detalhada do ocorrido
+    char data[11];        // Data do relato no formato DD-MM-AAAA (10 caracteres + '\0')
+    char hora[6];         // Hora do relato no formato HH:MM (5 caracteres + '\0')
+    float lat;            // Latitude do local do relato
+    float lon;            // Longitude do local do relato
+} Relato;
 
-# -----------------------------
-# Lista global que armazena os relatos
-# -----------------------------
-relatos = []
+// Array para armazenar todos os relatos cadastrados
+Relato relatos[MAX_RELATOS];
+int total_relatos = 0;    // Contador da quantidade de relatos cadastrados
 
-# -----------------------------
-# Função para cadastrar um novo relato
-# -----------------------------
-def cadastrar_relato(ponto_central):
-    print("\n--- Cadastro de Relato ---")
+// Função que converte graus para radianos (necessário para cálculos trigonométricos)
+double graus_para_radianos(double grau) {
+    return grau * M_PI / 180.0;
+}
 
-    # Coleta de dados pessoais do relator
-    nome = input("Nome completo: ")
-    documento = input("Documento: ")
-    email = input("Email: ")
-    telefone = input("Telefone: ")
+// Função que calcula a distância entre dois pontos geográficos usando a fórmula de Haversine
+double calcular_distancia_km(float lat1, float lon1, float lat2, float lon2) {
+    double phi1 = graus_para_radianos(lat1);                 // Latitude 1 em radianos
+    double phi2 = graus_para_radianos(lat2);                 // Latitude 2 em radianos
+    double delta_phi = graus_para_radianos(lat2 - lat1);     // Diferença das latitudes em radianos
+    double delta_lambda = graus_para_radianos(lon2 - lon1);  // Diferença das longitudes em radianos
 
-    # Coleta de informações do relato
-    tipo = input("Tipo de catástrofe (ex: enchente, incêndio): ")
-    descricao = input("Descrição: ")
-    data = input("Data (DD-MM-AAAA): ")
-    hora = input("Hora (HH:MM): ")
-    lat = float(input("Latitude do relato: "))
-    lon = float(input("Longitude do relato: "))
+    // Fórmula de Haversine
+    double a = sin(delta_phi / 2) * sin(delta_phi / 2) +
+               cos(phi1) * cos(phi2) * sin(delta_lambda / 2) * sin(delta_lambda / 2);
 
-    # Calcula a distância do relato em relação ao ponto central
-    distancia = calcular_distancia_km(ponto_central[0], ponto_central[1], lat, lon)
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
 
-    # Validação: só salva relatos dentro de um raio de 10 km
-    if distancia > 10:
-        print(f"\nRelato fora do raio de 10 km ({distancia:.2f} km). Não será salvo.")
-        return
+    // Retorna a distância em km multiplicando pelo raio da Terra
+    return RAIO_TERRA_KM * c;
+}
 
-    # Estrutura do relato
-    relato = {
-        "relator": {
-            "nome": nome,
-            "documento": documento,
-            "email": email,
-            "telefone": telefone,
-            "localizacao": (lat, lon)
-        },
-        "tipo": tipo,
-        "descricao": descricao,
-        "data": data,
-        "hora": hora,
-        "coordenadas": (lat, lon)
+// Função para cadastrar um novo relato, validando se está dentro do raio de 10 km do ponto central
+void cadastrar_relato(float lat_central, float lon_central) {
+    // Verifica se o limite de relatos já foi atingido
+    if (total_relatos >= MAX_RELATOS) {
+        printf("Limite de relatos atingido.\n");
+        return;
     }
 
-    # Adiciona o relato à lista global
-    relatos.append(relato)
-    print("Relato cadastrado com sucesso!\n")
+    Relato novo;
 
-# -----------------------------
-# Função para buscar relatos com base no tipo de catástrofe
-# -----------------------------
-def buscar_por_tipo():
-    tipo = input("\nDigite o tipo de catástrofe para buscar: ").lower()
+    // Entrada dos dados do relator
+    printf("Nome completo: ");
+    scanf(" %[^\n]", novo.relator.nome);         // Lê uma linha inteira até o '\n'
+    printf("Documento: ");
+    scanf(" %[^\n]", novo.relator.documento);
+    printf("Email: ");
+    scanf(" %[^\n]", novo.relator.email);
+    printf("Telefone: ");
+    scanf(" %[^\n]", novo.relator.telefone);
 
-    # Filtra relatos que correspondem ao tipo informado
-    encontrados = [r for r in relatos if r['tipo'].lower() == tipo]
+    // Entrada dos dados do relato
+    printf("Tipo de catástrofe: ");
+    scanf(" %[^\n]", novo.tipo);
+    printf("Descrição: ");
+    scanf(" %[^\n]", novo.descricao);
+    printf("Data (DD-MM-AAAA): ");
+    scanf(" %[^\n]", novo.data);
+    printf("Hora (HH:MM): ");
+    scanf(" %[^\n]", novo.hora);
+    printf("Latitude do relato: ");
+    scanf("%f", &novo.lat);
+    printf("Longitude do relato: ");
+    scanf("%f", &novo.lon);
 
-    # Exibe os resultados encontrados
-    if not encontrados:
-        print("Nenhum relato encontrado.")
-    else:
-        for i, r in enumerate(encontrados, 1):
-            print(f"\nRelato {i} - {r['tipo'].capitalize()} em {r['data']} às {r['hora']} por {r['relator']['nome']}")
-            print(f"Descrição: {r['descricao']}")
-            print(f"Coordenadas: {r['coordenadas']}")
+    // Atualiza latitude e longitude do relator com as do relato
+    novo.relator.lat = novo.lat;
+    novo.relator.lon = novo.lon;
 
-# -----------------------------
-# Função principal com menu de navegação do sistema
-# -----------------------------
-def menu():
-    print("""
-============================
-   GEORELATO - CLI SISTEMA
-============================
-    """)
-    # Definição do ponto central com base no input do usuário
-    lat_central = float(input("Digite a latitude do ponto central: "))
-    lon_central = float(input("Digite a longitude do ponto central: "))
-    ponto_central = (lat_central, lon_central)
+    // Calcula distância do relato para o ponto central
+    double distancia = calcular_distancia_km(lat_central, lon_central, novo.lat, novo.lon);
 
-    # Loop do menu
-    while True:
-        print("""
-Opções:
-1 - Cadastrar novo relato
-2 - Buscar relatos por tipo
-3 - Sair
-        """)
-        opcao = input("Escolha uma opção: ")
+    // Se o relato estiver fora do raio de 10 km, não é salvo
+    if (distancia > 10.0) {
+        printf("Relato fora do raio de 10 km (%.2f km). Não será salvo.\n", distancia);
+        return;
+    }
 
-        # Tratamento da opção escolhida
-        if opcao == '1':
-            cadastrar_relato(ponto_central)
-        elif opcao == '2':
-            buscar_por_tipo()
-        elif opcao == '3':
-            print("Encerrando o sistema. Até mais!")
-            break
-        else:
-            print("Opção inválida. Tente novamente.")
+    // Salva o relato e incrementa o contador
+    relatos[total_relatos++] = novo;
+    printf("Relato cadastrado com sucesso!\n");
+}
 
-# -----------------------------
-# Ponto de entrada do programa
-# -----------------------------
-if __name__ == "__main__":
-    menu()
+// Função para buscar relatos cadastrados por tipo de catástrofe
+void buscar_por_tipo() {
+    char tipo_busca[50];
+    printf("Digite o tipo de catástrofe para buscar: ");
+    scanf(" %[^\n]", tipo_busca);
+
+    int encontrados = 0;
+    // Percorre todos os relatos cadastrados
+    for (int i = 0; i < total_relatos; i++) {
+        // Compara o tipo do relato ignorando maiúsculas/minúsculas
+        if (strcasecmp(relatos[i].tipo, tipo_busca) == 0) {
+            encontrados++;
+            // Exibe os detalhes do relato encontrado
+            printf("\nRelato %d - %s em %s às %s por %s\n",
+                   encontrados, relatos[i].tipo, relatos[i].data,
+                   relatos[i].hora, relatos[i].relator.nome);
+            printf("Descrição: %s\n", relatos[i].descricao);
+            printf("Coordenadas: (%.4f, %.4f)\n", relatos[i].lat, relatos[i].lon);
+        }
+    }
+
+    // Caso não encontre nenhum relato do tipo buscado
+    if (encontrados == 0) {
+        printf("Nenhum relato encontrado.\n");
+    }
+}
+
+// Função principal do programa
+int main() {
+    float lat_central, lon_central;
+
+    // Entrada da localização central para o filtro de relatos
+    printf("Digite a latitude do ponto central: ");
+    scanf("%f", &lat_central);
+    printf("Digite a longitude do ponto central: ");
+    scanf("%f", &lon_central);
+
+    int opcao;
+    do {
+        // Menu principal do sistema
+        printf("\n===== GEORELATO - CLI SISTEMA =====\n");
+        printf("1 - Cadastrar novo relato\n");
+        printf("2 - Buscar relatos por tipo\n");
+        printf("3 - Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+
+        // Executa a ação conforme a opção escolhida
+        switch (opcao) {
+            case 1:
+                cadastrar_relato(lat_central, lon_central);
+                break;
+            case 2:
+                buscar_por_tipo();
+                break;
+            case 3:
+                printf("Encerrando o sistema. Até mais!\n");
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    } while (opcao != 3);  // Continua até o usuário escolher sair
+
+    return 0;  // Fim do programa
+}
 
 
 ```

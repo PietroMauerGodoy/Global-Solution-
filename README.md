@@ -237,7 +237,8 @@ int main() {
 | Nome do Arquivo       | Descrição                                         |
 |------------------------|--------------------------------------------------|
 | `README.md`            | Documentação do projeto                          |
-| `geo_relato.py`        | Código-fonte principal do sistema CLI            |
+| `geo_relato.c`        | Código-fonte principal do sistema CLI            |
+| `geo_relato.py`        | Código em Python         |
 | `integrantes.txt`      | Lista com nome e RM dos integrantes              |
 | `link_repositorio.txt`      | Link do repositório           |
 ---
